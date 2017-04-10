@@ -1,6 +1,7 @@
 # coding: utf-8
 import math
 import time
+import cv2
 import numpy as np
 import win32api
 import win32con
@@ -10,6 +11,7 @@ class FlappyBirdPlayer:
 
     def __init__(self):
         self.live_time = time.time()
+        self.template = cv2.imread('bird.png', 0)
 
     def act(self, hld):
         win32api.SendMessage(hld, win32con.WM_KEYDOWN, win32con.VK_UP, 0)
@@ -22,24 +24,47 @@ class FlappyBirdPlayer:
             if np.array_equal(a, b):
                 self.live_time = now
                 return
-            time.sleep(0.05)
+            time.sleep(0.01)
             a = b
             b = ImageGrab.grab(rangle)
 
-    def checkTerminal(self, old, new):
+    def findBirdY(self, img):
+        res = cv2.matchTemplate(img , self.template, cv2.TM_CCOEFF)
+        min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+        return max_loc
+    
+    def isCrash(self, img, x, y):
+
+        if img[x][y-1] > 10:
+            return True
+        if img[x+24][y-1] > 10:
+            return True
+        if img[x+23][y+34] > 10:
+            return True
+        if img[x+24][y+33] > 10:
+            return True
+        if img[x+23][y] > 10:
+            return True
+        if img[x-1][y] > 10:
+            return True
+        if img[x-1][y+34] > 10:
+            return True
+        if img[x][y+34] > 10:
+            return True
+        return False
+
+    def checkTerminal(self, image):
+        img = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) 
         now = time.time()
         lasting = now - self.live_time
         #reward = 0.2 /(1+math.exp(-lasting))
         reward = 0.1
-        terminal = np.array_equal(old, new)
-        if not terminal:
-            c = np.count_nonzero(np.asarray(old) - np.asarray(new))
-            print c,
-            if c < 34 * 24 * 3 * 2:
-                terminal = True
-        if terminal:
+        y, x= self.findBirdY(img)
+        terminal = False
+        if self.isCrash(img, x, y):
+            terminal = True
             reward = -1
-        if not terminal and lasting > 1.2:
+        if not terminal and lasting > 1.8:
             reward = 1
             self.live_time = now
 

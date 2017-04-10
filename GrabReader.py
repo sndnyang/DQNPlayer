@@ -49,27 +49,21 @@ class GrabReader:
         global c
         if action[1] == 1:
             self.act()
+        else:
+            time.sleep(0.02)
 
         self.first = self.second
-        self.second = self.third
         pic = ImageGrab.grab(self.rangle)
-        self.third = pic
+        self.second = pic
 
-        reward, terminal = self.player.checkTerminal(self.second, self.third)
-        #reward, terminal = self.player.checkTerminal(self.old, self.new)
+        reward, terminal = self.player.checkTerminal(np.asarray(self.second))
         if terminal:
-            # self.first.save(str(c) + '1.jpg')
+            self.second.save(str(c) + '.jpg')
             c += 1
-            self.player.wait_restart(self.second, self.third, self.rangle)
+            self.player.wait_restart(self.first, self.second, self.rangle)
             self.act()
-            self.first = None
-            self.second = ImageGrab.grab(self.rangle)
-            self.third = ImageGrab.grab(self.rangle)
-            img_data = np.asarray(self.second)
-        else:
-            img_data = np.asarray(self.second)
 
-        time.sleep(0.02)
+        img_data = np.asarray(self.second)
         return img_data, reward, terminal
 
     def act(self):
