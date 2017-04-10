@@ -1,5 +1,13 @@
 # 说明
 
+使用的是 mxnet 版， 因为 windows不方便 http://mxnet.io/get_started/windows_setup.html
+
+mxnet 安装部分：
+
+1. 先装 cuda , 我装了 8.0，但注意它里面自带驱动程序， 可能会造成  mxnet 找不到显卡， 或者叫显卡不支持 CUDA， 在 GPU-Z可查（我就是跟驱动弄了几次，文件坏了，重装系统了）
+2. 安装 Cuda toolkit , 我装的 5.3 
+
+
 DQN 部分来自 https://github.com/li-haoran/DRL-FlappyBird
 
 flappy bird 大概是在 https://github.com/sourabhv/FlapPyBird
@@ -9,4 +17,33 @@ flappy bird 大概是在 https://github.com/sourabhv/FlapPyBird
 GrabReader 就是对窗口截屏。
 
 FlappyBirdPlayer 是 FlappyBird 游戏的处理， 但状态还搞不定， 没有DRL-FlappyBird的稳定
+
+# 关键点
+
+判断 状态数据 与 反馈 与 游戏结束的逻辑关系
+
+## 原版
+
+pygame 设置频率 30赫兹， 1/30秒为1帧， 所以对应关系是：
+
+第n帧下一步动作 action ([0,1]表示跳， [1,0]表示正常)，得到下一帧的状态(observation)、 奖励reward 和 结束符terminal
+
+## 视频流截图问题
+
+无法直接计算下一帧的状态， 所以 状态里， 应该都截0.02秒后的图 作为下一帧的状态
+
+结束判断： 
+
+1. 地板不动， 所以两次截图应该是相同的
+2. 撞墙情况，则是垂直变化， 两次图的变化格数有限——小鸟图像素的2倍之内。
+
+奖励：
+
+1. 正常 0.1 其实想用 sigmoid函数的
+2. 结束 -1
+3. 大概 1.8秒过一个， 因为两关水管间距离是半个屏宽 144， 一秒移动速度  20 * 4 = 80， 1.8秒一次 +1
+
+问题：
+
+主要是 结束状态很不准确， 无法第一时间结束， 不能使用截图法判断终止。
 
