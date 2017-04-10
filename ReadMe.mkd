@@ -1,0 +1,12 @@
+# 说明
+
+DQN 部分来自 https://github.com/li-haoran/DRL-FlappyBird
+
+flappy bird 大概是在 https://github.com/sourabhv/FlapPyBird
+
+把窗口作为视频一样的处理， 提供通用的框架， 毕竟每个程序都要写代码才能和有数据接口， 更合理的还是人眼也就是视频的处理方式。
+
+GrabReader 就是对窗口截屏。
+
+FlappyBirdPlayer 是 FlappyBird 游戏的处理， 但状态还搞不定， 没有DRL-FlappyBird的稳定
+
