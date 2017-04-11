@@ -1,49 +1,60 @@
-# ˵��
+﻿# 自主玩游戏
 
-ʹ�õ��� mxnet �棬 ��Ϊ windows������ http://mxnet.io/get_started/windows_setup.html
+DQN 部分来自 https://github.com/li-haoran/DRL-FlappyBird
 
-mxnet ��װ���֣�
+flappy bird 大概是在 https://github.com/sourabhv/FlapPyBird
 
-1. ��װ cuda , ��װ�� 8.0����ע���������Դ��������� ���ܻ����  mxnet �Ҳ����Կ��� ���߽��Կ���֧�� CUDA�� �� GPU-Z�ɲ飨�Ҿ��Ǹ�����Ū�˼��Σ��ļ����ˣ���װϵͳ�ˣ�
-2. ��װ Cuda toolkit , ��װ�� 5.3 
+把窗口作为视频一样的处理， 提供通用的框架， 毕竟每个程序都要写代码才能和有数据接口， 更合理的还是人眼也就是视频的处理方式。
 
+GrabReader 就是对窗口截屏。
 
-DQN �������� https://github.com/li-haoran/DRL-FlappyBird
+FlappyBirdPlayer 是 FlappyBird 游戏的处理， 但状态还搞不定， 没有DRL-FlappyBird的稳定
 
-flappy bird ������� https://github.com/sourabhv/FlapPyBird
+# 关键点
 
-�Ѵ�����Ϊ��Ƶһ���Ĵ����� �ṩͨ�õĿ�ܣ� �Ͼ�ÿ������Ҫд������ܺ������ݽӿڣ� �������Ļ�������Ҳ������Ƶ�Ĵ�����ʽ��
+判断 状态数据 与 反馈 与 游戏结束的逻辑关系
 
-GrabReader ���ǶԴ��ڽ�����
+## 原版
 
-FlappyBirdPlayer �� FlappyBird ��Ϸ�Ĵ����� ��״̬���㲻���� û��DRL-FlappyBird���ȶ�
+pygame 设置频率 30赫兹， 1/30秒为1帧， 所以对应关系是：
 
-# �ؼ���
+第n帧下一步动作 action ([0,1]表示跳， [1,0]表示正常)，得到下一帧的状态(observation)、 奖励reward 和 结束符terminal
 
-�ж� ״̬���� �� ���� �� ��Ϸ�������߼���ϵ
+## 视频流截图问题
 
-## ԭ��
+无法直接计算下一帧的状态， 所以 状态里， 应该都截0.02秒后的图 作为下一帧的状态
 
-pygame ����Ƶ�� 30���ȣ� 1/30��Ϊ1֡�� ���Զ�Ӧ��ϵ�ǣ�
+结束判断： 
 
-��n֡��һ������ action ([0,1]��ʾ���� [1,0]��ʾ����)���õ���һ֡��״̬(observation)�� ����reward �� ������terminal
+1. 地板不动， 所以两次截图应该是相同的
+2. 撞墙情况，则是垂直变化， 两次图的变化格数有限——小鸟图像素的2倍之内。
 
-## ��Ƶ����ͼ����
+奖励：
 
-�޷�ֱ�Ӽ�����һ֡��״̬�� ���� ״̬� Ӧ�ö���0.02����ͼ ��Ϊ��һ֡��״̬
+1. 正常 0.1 其实想用 sigmoid函数的
+2. 结束 -1
+3. 大概 1.8秒过一个， 因为两关水管间距离是半个屏宽 144， 一秒移动速度  20 * 4 = 80， 1.8秒一次 +1
 
-�����жϣ� 
+问题：
 
-1. �ذ岻���� �������ν�ͼӦ������ͬ��
-2. ײǽ��������Ǵ�ֱ�仯�� ����ͼ�ı仯�������ޡ���С��ͼ���ص�2��֮�ڡ�
+主要是 下一帧的状态很不准确, 尤其是结束部分。
 
-������
+把操作 与 结束操作分开， 似乎状态就好很多了。
 
-1. ���� 0.1 ��ʵ���� sigmoid������
-2. ���� -1
-3. ��� 1.8���һ���� ��Ϊ����ˮ�ܼ�����ǰ������ 144�� һ���ƶ��ٶ�  20 * 4 = 80�� 1.8��һ�� +1
+# 说明
 
-���⣺
+使用的是 mxnet 版， 因为 windows不方便 [mxnet官方安装说明](http://mxnet.io/get_started/windows_setup.html)
 
-��Ҫ�� ����״̬�ܲ�׼ȷ�� �޷���һʱ������� ����ʹ�ý�ͼ���ж���ֹ��
+## Mxnet 配置
 
+[mxnet 安装部分](/mxnet-Windows-installation.html)：
+
+1. 先装 cuda , 我装了 8.0，但注意它里面自带驱动程序， 可能会造成  mxnet 找不到显卡， 或者叫显卡不支持 CUDA， 下载GPU-Z可查， 我是碰到安装驱动后，刚开始能用， 重启后失败，反复重装驱动，黑屏了重启，结果文件坏了，只能重装系统。 现在版本 GeForce 940M  378.92版驱动。
+2. 安装 Cuda toolkit , 我装的 5.3 
+3. https://github.com/dmlc/mxnet/releases, [mxnet windows下载地址](https://github.com/yajiedesign/mxnet/releases)
+4. 按照说明， 初次使用，先下载 base package 即基本包， 我下载的是 vc12， 对应 cudnnv5.1
+5. 解压， 将 cudnnv5.1 bin下的cudnnXX_X.dll， 放到 3rdparty\cudnn\bin 下。 和base包里 README.txt描述不同， 里面写的是放到 3rdparty\cudnn 下， 但 setupenv.cmd里是 bin文件夹
+6. 运行 setupenv.cmd
+7. 下载最新的 mxnet
+8. 检查 dll依赖关系， 使用 Dependency Walker 打开 build目录下的 libmxnet.dll， 除了一个 ie 开头的不用管，其他要搜一下，比如是 cudnnv 还是 vc没装好
+9. Python版，安装， 照包里的 README.txt 运行、测试即可
