@@ -37,31 +37,31 @@ class GrabReader:
         self.hld = hld
 
         # 调整坐标  
-        self.rangle = (rect.left+2,rect.top+22,rect.right-2,rect.bottom-20) 
+        self.rangle = (rect.left+3,rect.top+32,rect.right-3,rect.bottom-20) 
         self.first = None
         self.second = ImageGrab.grab(self.rangle)
-        self.third = ImageGrab.grab(self.rangle)
 
         self.player = Player()
 
     def state(self, action):
         # 抓图
         global c
+
         if action[1] == 1:
             self.act()
-        else:
-            time.sleep(0.02)
 
+        time.sleep(0.03)
         self.first = self.second
         pic = ImageGrab.grab(self.rangle)
         self.second = pic
 
-        reward, terminal = self.player.checkTerminal(np.asarray(self.second))
+        reward, terminal = self.player.checkTerminal(np.asarray(self.second),
+                action[1])
         if terminal:
-            self.second.save(str(c) + '.jpg')
+            # self.first.save(str(c) + '1.jpg')
+            #self.second.save(str(c) + '.jpg')
             c += 1
-            self.player.wait_restart(self.first, self.second, self.rangle)
-            self.act()
+            self.player.restart(self.hld)
 
         img_data = np.asarray(self.second)
         return img_data, reward, terminal

@@ -10,13 +10,11 @@ from PIL import ImageGrab
 class FlappyBirdPlayer:
 
     def __init__(self):
-        self.live_time = time.time()
         self.template = cv2.imread('bird.png', 0)
 
     def act(self, hld):
         win32api.SendMessage(hld, win32con.WM_KEYDOWN, win32con.VK_UP, 0)
         win32api.SendMessage(hld, win32con.WM_KEYUP, win32con.VK_UP, 0)
-        time.sleep(0.02)
 
     def wait_restart(self, a, b, rangle):
         now = time.time()
@@ -29,9 +27,9 @@ class FlappyBirdPlayer:
             b = ImageGrab.grab(rangle)
 
     def findBirdY(self, img):
-        res = cv2.matchTemplate(img , self.template, cv2.TM_CCOEFF)
+        res = cv2.matchTemplate(img , self.template, cv2.TM_CCOEFF_NORMED)
         min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
-        return max_loc
+        return max_loc, max_val
     
     def isCrash(self, img, x, y):
 
@@ -53,19 +51,32 @@ class FlappyBirdPlayer:
             return True
         return False
 
-    def checkTerminal(self, image):
+    def checkTerminal(self, image, flap):
         img = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) 
-        now = time.time()
-        lasting = now - self.live_time
         #reward = 0.2 /(1+math.exp(-lasting))
         reward = 0.1
-        y, x= self.findBirdY(img)
+        loc, val = self.findBirdY(img)
         terminal = False
-        if self.isCrash(img, x, y):
+        x, y = loc
+        if self.isCrash(img, y, x):
             terminal = True
+
+        pipe_y = 1
+        if y < 2:
+            pipe_y = 35
+
+        w = len(img[0])
+        for i in range(10, w-10):
+            if img[pipe_y][i-1] < 10 and img[pipe_y][i] > 10\
+                    and i < x+34 and i + 52 > x:
+                reward = 1
+                print reward,
+
+        if val < 0.5 or terminal:            
             reward = -1
-        if not terminal and lasting > 1.8:
-            reward = 1
-            self.live_time = now
 
         return reward, terminal
+
+    def restart(self, hld):
+        win32api.SendMessage(hld, win32con.WM_KEYDOWN, win32con.VK_SPACE, 0)
+        win32api.SendMessage(hld, win32con.WM_KEYUP, win32con.VK_SPACE, 0)
