@@ -3,3 +3,4 @@ saved_networks
 .ipynb_checkpoints
 *.jpg
 *.png
+*test*
