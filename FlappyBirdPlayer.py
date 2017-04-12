@@ -1,20 +1,26 @@
 # coding: utf-8
+import sys
+sys.path.append("game/")
+
 import math
 import time
 import cv2
 import numpy as np
 import win32api
 import win32con
+import wrapped_flappy_bird as game
 from PIL import ImageGrab
+
 
 class FlappyBirdPlayer:
 
     def __init__(self):
+        self.flappyBird = game.GameState()
+
         self.template = cv2.imread('bird.png', 0)
 
-    def act(self, hld):
-        win32api.SendMessage(hld, win32con.WM_KEYDOWN, win32con.VK_UP, 0)
-        win32api.SendMessage(hld, win32con.WM_KEYUP, win32con.VK_UP, 0)
+    def act(self, hld, actions):
+        self.flappyBird.frame_step(actions)
 
     def wait_restart(self, a, b, rangle):
         now = time.time()
@@ -68,9 +74,8 @@ class FlappyBirdPlayer:
         w = len(img[0])
         for i in range(10, w-10):
             if img[pipe_y][i-1] < 10 and img[pipe_y][i] > 10\
-                    and i < x+34 and i + 52 > x:
+                    and i < x + 22 and i > x + 17:
                 reward = 1
-                print reward,
 
         if val < 0.5 or terminal:            
             reward = -1
@@ -78,5 +83,4 @@ class FlappyBirdPlayer:
         return reward, terminal
 
     def restart(self, hld):
-        win32api.SendMessage(hld, win32con.WM_KEYDOWN, win32con.VK_SPACE, 0)
-        win32api.SendMessage(hld, win32con.WM_KEYUP, win32con.VK_SPACE, 0)
+        self.flappyBird.__init__() 
