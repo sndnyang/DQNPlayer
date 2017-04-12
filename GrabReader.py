@@ -29,7 +29,8 @@ class GrabReader:
         hld = win32gui.FindWindow(None, label)
 
         win32gui.ShowWindow(hld, win32con.SW_RESTORE)  # 强行显示界面后才好截图
-      # win32gui.SetForegroundWindow(hld)  # 将窗口提到最前
+        win32gui.SetForegroundWindow(hld)  # 将窗口提到最前
+        time.sleep(1)
 
         # 取当前窗口坐标  
         rect = RECT() 
@@ -47,25 +48,24 @@ class GrabReader:
         # 抓图
         global c
 
-        if action[1] == 1:
-            self.act()
+        self.act(action)
 
-        time.sleep(0.03)
         self.first = self.second
         pic = ImageGrab.grab(self.rangle)
-        self.second = pic
 
-        reward, terminal = self.player.checkTerminal(np.asarray(self.second),
+        reward, terminal = self.player.checkTerminal(np.asarray(pic),
                 action[1])
+        self.second = pic
         if terminal:
-            # self.first.save(str(c) + '1.jpg')
-            #self.second.save(str(c) + '.jpg')
-            c += 1
+           #if action[1] == 1:
+           #    self.first.save(str(c) + '-' + str(action[1]) + '-1.jpg')
+           #    self.second.save(str(c) + '-' + str(action[1]) + '-2.jpg')
+           #    c += 1
             self.player.restart(self.hld)
-
         img_data = np.asarray(self.second)
+
         return img_data, reward, terminal
 
-    def act(self):
-        self.player.act(self.hld)
+    def act(self, action):
+        self.player.act(self.hld, action)
 
