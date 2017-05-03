@@ -18,8 +18,11 @@ def preprocess(observation):
 def play():
     # Step 1: init BrainDQN
     actions = 2
-    brain = BrainDQN(actions, 'saved_networks/network-dqn_mx17000.params')
-    #brain = BrainDQN(actions)
+    if len(sys.argv) > 1: 
+        brain = BrainDQN(actions, 'saved_networks/network-dqn_mx%04s.params'%
+                sys.argv[1])
+    else:
+        brain = BrainDQN(actions)
     # Step 2: init Flappy Bird Game
     game = GrabReader(label)
     action0 = np.array([0, 1])
@@ -42,7 +45,7 @@ def play():
             brain.setInitState(ob)
             old = False
         else:
-            print action[1],
+            print int(action[1]),
             ob, rew, ter = game.state(action)
             print rew, ter,
             sys.stdout.flush()
@@ -52,4 +55,5 @@ def play():
         
 
 if __name__ == "__main__":
+    import sys
     play()
