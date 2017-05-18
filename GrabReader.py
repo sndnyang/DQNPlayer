@@ -1,14 +1,16 @@
 # coding: utf-8
-import random
+import sys
 import time
+import random
 import numpy as np
 import ctypes
 import win32gui
 import win32api
 import win32con
-from PIL import ImageGrab
+from PIL import ImageGrab, Image
 
-from FlappyBirdPlayer import FlappyBirdPlayer as Player
+from player import FlappyBirdPlayer
+from player import SuperMarioPlayer
 
 class RECT(ctypes.Structure): 
     _fields_ = [('left', ctypes.c_long), 
@@ -18,15 +20,14 @@ class RECT(ctypes.Structure):
     def __str__(self): 
         return str((self.left, self.top, self.right, self.bottom)) 
 
-
 c = 0
 
 class GrabReader:
 
-    def __init__(self, label): 
-        self.label = label
+    def __init__(self, args): 
+        self.label = args.game
 
-        hld = win32gui.FindWindow(None, label)
+        hld = win32gui.FindWindow(None, self.label)
 
         win32gui.ShowWindow(hld, win32con.SW_RESTORE)  # 强行显示界面后才好截图
       # win32gui.SetForegroundWindow(hld)  # 将窗口提到最前
@@ -41,22 +42,33 @@ class GrabReader:
         self.first = None
         self.second = ImageGrab.grab(self.rangle)
 
-        self.player = Player()
+        players = {'SuperMario': SuperMarioPlayer,
+                'FlappyBird': FlappyBirdPlayer}
+        if self.label not in players:
+            print '游戏名不正确'
+            sys.exit(1)
+
+        self.player = players[self.label]()
 
     def state(self, action):
         # 抓图
         global c
 
-        if action[1] == 1:
-            self.act()
+        self.act(action)
 
-        time.sleep(0.03)
+        #time.sleep(0.03)
         self.first = self.second
         pic = ImageGrab.grab(self.rangle)
         self.second = pic
 
-        reward, terminal = self.player.checkTerminal(np.asarray(self.second),
-                action[1])
+        reward, terminal = self.player.checkTerminal(np.asarray(self.first),
+                np.asarray(self.second), action)
+        if c < 100:
+            t = np.abs(np.asarray(self.second, dtype="int16")-np.asarray(self.first, dtype="int16"))
+            Image.fromarray(np.uint8(t)).save('images/subtract-' + str(c) + '.jpg')
+            self.first.save('images/subtract-' + str(c) + '-1.jpg')
+            self.second.save('images/subtract-' + str(c) + '-2.jpg')
+        c+=1
         if terminal:
             # self.first.save(str(c) + '1.jpg')
             #self.second.save(str(c) + '.jpg')
@@ -66,6 +78,9 @@ class GrabReader:
         img_data = np.asarray(self.second)
         return img_data, reward, terminal
 
-    def act(self):
-        self.player.act(self.hld)
+    def act(self, action):
+        self.player.act(self.hld, action)
+
+    def restart(self):
+        self.player.restart(self.hld)
 
