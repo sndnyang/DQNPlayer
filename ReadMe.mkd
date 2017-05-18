@@ -10,6 +10,13 @@ GrabReader 就是对窗口截屏。
 
 FlappyBirdPlayer 是 FlappyBird 游戏的处理， 但状态还搞不定， 没有DRL-FlappyBird的稳定
 
+# 命令行
+
+-a, --action        控制键，control keys, 格式format: a,b,x,up,right(TODO)
+-k, --keybind       游戏操控方式，默认使用消息传递方式，模拟器运行需要该参数(TODO)
+-g, --game          游戏名即游戏窗口显示的名字, game name, the text shown in the windows
+-p, --param         已保存参数文件序号, saved_networks/network-dqn_mx????.params
+            
 # 关键点
 
 判断 状态数据 与 反馈 与 游戏结束的逻辑关系
