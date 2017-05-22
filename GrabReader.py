@@ -9,8 +9,7 @@ import win32api
 import win32con
 from PIL import ImageGrab, Image
 
-from player import FlappyBirdPlayer
-from player import SuperMarioPlayer
+from player import *
 
 class RECT(ctypes.Structure): 
     _fields_ = [('left', ctypes.c_long), 
@@ -37,13 +36,14 @@ class GrabReader:
         ctypes.windll.user32.GetWindowRect(hld,ctypes.byref(rect)) 
         self.hld = hld
 
-        # 调整坐标  
+        # 调整坐标
         self.rangle = (rect.left+3,rect.top+32,rect.right-3,rect.bottom-20) 
         self.first = None
         self.second = ImageGrab.grab(self.rangle)
 
         players = {'SuperMario': SuperMarioPlayer,
-                'FlappyBird': FlappyBirdPlayer}
+                'FlappyBird': FlappyBirdPlayer,
+                'PacMan': PacManPlayer}
         if self.label not in players:
             print '游戏名不正确'
             sys.exit(1)
@@ -63,11 +63,12 @@ class GrabReader:
 
         reward, terminal = self.player.checkTerminal(np.asarray(self.first),
                 np.asarray(self.second), action)
+
         if c < 100:
             t = np.abs(np.asarray(self.second, dtype="int16")-np.asarray(self.first, dtype="int16"))
-            Image.fromarray(np.uint8(t)).save('images/subtract-' + str(c) + '.jpg')
-            self.first.save('images/subtract-' + str(c) + '-1.jpg')
-            self.second.save('images/subtract-' + str(c) + '-2.jpg')
+            Image.fromarray(np.uint8(t)).save('images/'+self.label+'/subtract-' + str(c) + '.jpg')
+            self.first.save('images/'+self.label+'/subtract-' + str(c) + '-1.jpg')
+            self.second.save('images/'+self.label+'/subtract-' + str(c) + '-2.jpg')
         c+=1
         if terminal:
             # self.first.save(str(c) + '1.jpg')
@@ -75,8 +76,8 @@ class GrabReader:
             c += 1
             self.player.restart(self.hld)
 
-        img_data = np.asarray(self.second)
-        return img_data, reward, terminal
+        img = np.asarray(self.second)
+        return img, reward, terminal
 
     def act(self, action):
         self.player.act(self.hld, action)

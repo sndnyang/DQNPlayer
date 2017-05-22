@@ -1,4 +1,5 @@
 # coding: utf-8
+import os
 import sys
 sys.path.append("game/")
 
@@ -15,7 +16,9 @@ class FlappyBirdPlayer:
 
     def __init__(self):
         self.actions = 2
-        self.template = cv2.imread('bird.png', 0)
+        png = os.path.join(os.path.dirname(__file__), 'bird.png')
+        print png
+        self.template = cv2.imread(png, 0)
 
     def act(self, hld, action):
         if action[1] == 1:
