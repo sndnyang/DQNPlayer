@@ -2,3 +2,4 @@
 
 from FlappyBird import FlappyBirdPlayer
 from SuperMarioPlayer import SuperMarioPlayer
+from PacManPlayer import PacManPlayer
