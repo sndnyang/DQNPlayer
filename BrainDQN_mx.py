@@ -155,8 +155,9 @@ class BrainDQN:
         self.currentState = temp
     
     def setPerception(self,nextObservation,action,reward,terminal):
-        #newState = np.append(nextObservation,self.currentState[:,:,1:],axis = 2)
+        # newState = np.append(nextObservation,self.currentState[:,:,1:],axis = 2)
 
+        # 这里已经把当前状态（前一帧）的第一列省略进行组合了
         newState = np.append(self.currentState[:,1:,:,:],dataPrep(nextObservation),axis = 1)
         self.replayMemory.append((self.currentState,action,reward,newState,terminal))
         if len(self.replayMemory) > REPLAY_MEMORY:

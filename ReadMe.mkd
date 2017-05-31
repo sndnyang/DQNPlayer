@@ -14,10 +14,12 @@ FlappyBirdPlayer 是 FlappyBird 游戏的处理， 但状态还搞不定， 没�
 
 在 simKeyBoard 分支
 
--a, --action        控制键，control keys, 格式format: a,b,x,up,right(TODO)
--k, --keybind       游戏操控方式，默认使用消息传递方式，模拟器运行需要该参数(TODO)
--g, --game          游戏名即游戏窗口显示的名字, game name, the text shown in the windows
--p, --param         已保存参数文件序号, saved_networks/network-dqn_mx????.params
+python GamePlayer.py 
+
+- -a, --action        控制键，control keys, 格式format: a,b,x,up,right(TODO)
+- -k, --keybind       游戏操控方式，默认使用消息传递方式，模拟器运行需要该参数(TODO)
+- -g, --game          游戏名即游戏窗口显示的名字, game name, the text shown in the windows
+- -p, --param         已保存参数文件序号, saved_networks/network-dqn_mx????.params
             
 # 关键点
 
